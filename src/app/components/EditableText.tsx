@@ -8,9 +8,16 @@ type Props = {
   multiline?: boolean;
   placeholder?: string;
   className?: string;
+  /** onBrand: 紫の帯の上に置くとき(編集中の背景や枠を白系にする) */
+  tone?: "default" | "onBrand";
 };
 
-export function EditableText({ value, onChange, editing, multiline, placeholder, className }: Props) {
+const EDITING_TONES = {
+  default: "bg-primary/5 hover:bg-primary/10 focus:bg-background focus:ring-2 focus:ring-primary",
+  onBrand: "bg-white/10 hover:bg-white/15 focus:bg-white/20 focus:ring-2 focus:ring-white/70",
+};
+
+export function EditableText({ value, onChange, editing, multiline, placeholder, className, tone = "default" }: Props) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -22,7 +29,7 @@ export function EditableText({ value, onChange, editing, multiline, placeholder,
   if (!editing) {
     return (
       <div className={cn(multiline ? "whitespace-pre-wrap" : "", className)}>
-        {value || <span className="text-muted-foreground">{placeholder}</span>}
+        {value || <span className={tone === "onBrand" ? "text-white/70" : "text-muted-foreground"}>{placeholder}</span>}
       </div>
     );
   }
@@ -34,7 +41,8 @@ export function EditableText({ value, onChange, editing, multiline, placeholder,
       suppressContentEditableWarning
       onBlur={(e) => onChange(e.currentTarget.innerText)}
       className={cn(
-        "outline-none rounded px-1.5 py-0.5 -mx-1.5 -my-0.5 ring-1 ring-dashed ring-border focus:ring-primary focus:ring-2 focus:ring-solid bg-background/40",
+        "outline-none rounded px-1.5 py-0.5 -mx-1.5 -my-0.5",
+        EDITING_TONES[tone],
         multiline ? "whitespace-pre-wrap min-h-[1.5em]" : "",
         className,
       )}

@@ -1,5 +1,6 @@
 import regularFontUrl from "@expo-google-fonts/noto-sans-jp/400Regular/NotoSansJP_400Regular.ttf?url";
 import boldFontUrl from "@expo-google-fonts/noto-sans-jp/700Bold/NotoSansJP_700Bold.ttf?url";
+import { stripHtml } from "./text";
 import type { AlertVariant, Block, Manual } from "./types";
 
 // pdfmake の docDefinition は型定義を入れていないため、緩い型で扱う
@@ -11,7 +12,7 @@ const COLOR = {
   muted: "#77758B",
   border: "#E8E6EF",
   tableHeader: "#F1F0FA",
-  quoteBackground: "#FBF9FF",
+  quoteBackground: "#F4F2FC",
 };
 
 const ALERT_STYLES: Record<AlertVariant, { label: string; color: string; background: string }> = {
@@ -20,19 +21,6 @@ const ALERT_STYLES: Record<AlertVariant, { label: string; color: string; backgro
   danger: { label: "警告", color: "#C94F58", background: "#FBEBEC" },
   success: { label: "完了", color: "#32856A", background: "#E8F4EF" },
 };
-
-const stripHtml = (html: string) =>
-  String(html ?? "")
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<\/(p|div|li|h[1-6])>/gi, "\n")
-    .replace(/<[^>]+>/g, "")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&amp;/g, "&")
-    .trim();
 
 const sanitize = (s: string) => s.replace(/[\\/:*?"<>|]/g, "_").trim() || "manual";
 
@@ -150,8 +138,11 @@ function manualToContent(m: Manual, pageBreakBefore: boolean): Content[] {
     table: {
       widths: [70, "*", 70, "*"],
       body: [
-        [label("カテゴリー"), m.category, label("ジャンル"), m.genre],
+        [label("課"), m.department, label("フォルダ"), m.folder],
         [label("作成者"), m.author, label("最終改定日"), m.updatedAt],
+        ...((m.tags ?? []).length > 0
+          ? [[label("タグ"), { text: (m.tags ?? []).map((t) => `#${t}`).join("  "), colSpan: 3 }, {}, {}]]
+          : []),
         [label("任務目的"), { text: m.purpose, colSpan: 3 }, {}, {}],
       ],
     },

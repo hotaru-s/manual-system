@@ -132,7 +132,7 @@ export function RichEditor({
           transform: "translateX(-50%)",
           zIndex: 60,
         }}
-        className="rich-toolbar-keep flex items-center gap-0.5 rounded-md border bg-background shadow-md p-1 w-fit"
+        className="rich-toolbar-keep flex items-center gap-0.5 rounded-md bg-background shadow-md p-1 w-fit"
         onMouseDown={(e) => e.preventDefault()}
       >
         <Button size="sm" variant="ghost" className="size-8 p-0" onClick={() => exec("bold")}>
@@ -205,7 +205,7 @@ export function RichEditor({
           "rich-content outline-none leading-relaxed",
           inline
             ? "px-1.5 py-1 rounded min-h-[1.75rem] focus:bg-muted/40"
-            : "rounded px-2 py-1.5 ring-1 ring-dashed ring-border focus:ring-primary focus:ring-2 bg-background/40 min-h-[2.5em]",
+            : "rounded px-2 py-1.5 bg-primary/5 hover:bg-primary/10 focus:bg-background focus:ring-2 focus:ring-primary min-h-[2.5em]",
           className,
         )}
         data-placeholder={placeholder}
