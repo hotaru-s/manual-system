@@ -371,8 +371,8 @@ function TableBlockView({
 /* ============== Alert ============== */
 const ALERT_STYLES: Record<AlertVariant, { wrap: string; icon: React.ReactNode; label: string }> = {
   info: {
-    wrap: "border-sky-300 bg-sky-50 text-sky-900",
-    icon: <Info className="size-5 text-sky-600" />,
+    wrap: "border-primary/40 bg-primary/10 text-foreground",
+    icon: <Info className="size-5 text-primary" />,
     label: "情報",
   },
   warning: {

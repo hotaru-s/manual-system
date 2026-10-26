@@ -8,7 +8,7 @@ import { ManualView } from "./components/ManualView";
 import { Button } from "./components/ui/button";
 import { Toaster } from "./components/ui/sonner";
 import { initialManuals } from "./data";
-import { exportAllManualsToExcel, exportManualToExcel } from "./excelExport";
+import { exportAllManualsToPdf, exportManualToPdf } from "./pdfExport";
 import type { Manual } from "./types";
 
 const STORAGE_KEY = "manual-site-v4";
@@ -212,18 +212,18 @@ export default function App() {
               <>
                 <Button
                   size="sm"
-                  variant="ghost"
-                  className="gap-1.5 text-muted-foreground hover:text-foreground"
+                  variant="outline"
+                  className="gap-1.5"
                   onClick={() => {
-                    exportManualToExcel(selected);
-                    toast.success("Excelをダウンロードしました");
+                    exportManualToPdf(selected)
+                      .then(() => toast.success("PDFをダウンロードしました"))
+                      .catch(() => toast.error("PDFの出力に失敗しました"));
                   }}
                 >
                   <Download className="size-4" />
-                  Excel出力
+                  PDF出力
                 </Button>
                 <Button
-                  variant={editing ? "default" : "outline"}
                   size="sm"
                   className="gap-2"
                   onClick={() => {
@@ -252,19 +252,19 @@ export default function App() {
               <>
                 <Button
                   size="sm"
-                  variant="ghost"
-                  className="gap-1.5 text-muted-foreground hover:text-foreground"
+                  variant="outline"
+                  className="gap-1.5"
                   onClick={() => {
-                    exportAllManualsToExcel(manuals);
-                    toast.success("Excelをダウンロードしました");
+                    exportAllManualsToPdf(manuals)
+                      .then(() => toast.success("PDFをダウンロードしました"))
+                      .catch(() => toast.error("PDFの出力に失敗しました"));
                   }}
                 >
                   <Download className="size-4" />
-                  全てExcel出力
+                  全てPDF出力
                 </Button>
                 <Button
                   size="sm"
-                  variant="outline"
                   className="gap-2"
                   onClick={() => createManual(view.type === "category" ? view.category : undefined)}
                 >

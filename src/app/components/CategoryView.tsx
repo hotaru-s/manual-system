@@ -74,10 +74,12 @@ export function CategoryView({ category, manuals, onBack, onOpen, onCreate, onRe
               {category}
             </h1>
           )}
-          <p className="text-muted-foreground mt-1.5">{manuals.length} 件の記事があります</p>
+          <p className="mt-2 inline-flex rounded-full bg-coral/25 px-2.5 py-0.5 text-xs font-medium text-foreground">
+            {manuals.length} 件の記事があります
+          </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <Button size="sm" variant="outline" className="gap-1.5" onClick={onCreate}>
+          <Button size="sm" className="gap-1.5" onClick={onCreate}>
             <Plus className="size-3.5" />
             新規マニュアル
           </Button>
@@ -107,11 +109,11 @@ export function CategoryView({ category, manuals, onBack, onOpen, onCreate, onRe
             <button
               key={m.id}
               onClick={() => onOpen(m.id)}
-              className="group w-full flex items-center gap-4 px-6 py-5 hover:bg-muted/40 transition-colors text-left"
+              className="group w-full flex items-center gap-4 px-6 py-5 hover:bg-primary/5 transition-colors text-left"
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1.5">
-                  <Badge variant="outline" className="font-normal">
+                  <Badge variant="outline" className="border-primary/30 bg-primary/10 font-medium text-primary">
                     {m.genre}
                   </Badge>
                 </div>

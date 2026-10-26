@@ -123,9 +123,9 @@ export function ManualView({ manual, editing, onChange, onDelete, onBack }: Prop
               <button
                 key={t.id}
                 onClick={() => scrollTo(t.id)}
-                className="group inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1.5 text-sm hover:border-foreground hover:shadow-sm transition-all"
+                className="group inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1.5 text-sm hover:border-primary hover:bg-primary/5 hover:shadow-sm transition-all"
               >
-                <span className="text-muted-foreground group-hover:text-foreground text-xs tabular-nums transition-colors">
+                <span className="rounded-full bg-coral/25 px-1.5 text-[11px] font-semibold text-foreground tabular-nums">
                   {String(t.index).padStart(2, "0")}
                 </span>
                 {t.label || "（無題）"}
@@ -138,8 +138,8 @@ export function ManualView({ manual, editing, onChange, onDelete, onBack }: Prop
         </div>
 
         {editing && (
-          <div className="rounded-xl border bg-amber-50/50 border-amber-200 px-4 py-3 flex items-center gap-2.5 text-sm text-amber-900">
-            <Sparkles className="size-4 text-amber-600 shrink-0" />
+          <div className="rounded-xl border bg-coral/15 border-coral/50 px-4 py-3 flex items-center gap-2.5 text-sm text-foreground">
+            <Sparkles className="size-4 text-coral shrink-0" />
             <span>編集モード中 — テキストをクリックして編集、ブロックをホバーして並び替え・削除できます。</span>
           </div>
         )}
@@ -208,7 +208,7 @@ function SectionBlock({
   return (
     <section id={section.id} className="scroll-mt-6 group/section">
       <div className="flex items-center gap-4 mb-6">
-        <span className="shrink-0 inline-flex items-center justify-center size-10 rounded-lg bg-foreground text-background text-base font-medium tabular-nums">
+        <span className="shrink-0 inline-flex items-center justify-center size-10 rounded-lg bg-primary text-primary-foreground text-base font-bold tabular-nums">
           {index + 1}
         </span>
         <div className="flex-1 min-w-0">
@@ -299,8 +299,8 @@ function ItemBlock({
 
   return (
     <div className="group/item relative -ml-3 pl-3">
-      <div className="flex items-center gap-3 pb-3 border-b-2 border-foreground/80">
-        <span className="shrink-0 inline-flex items-center justify-center h-8 px-2.5 rounded-md bg-foreground text-background text-sm tabular-nums font-semibold tracking-tight shadow-sm">
+      <div className="flex items-center gap-3 pb-3 border-b-2 border-primary">
+        <span className="shrink-0 inline-flex items-center justify-center h-8 px-2.5 rounded-md bg-primary text-primary-foreground text-sm tabular-nums font-semibold tracking-tight shadow-sm">
           {sectionIndex + 1}.{itemIndex + 1}
         </span>
         <div className="flex-1 min-w-0">

@@ -1,4 +1,4 @@
-import { ArrowUpRight, BookOpen, FolderPlus, MoreHorizontal, Pencil, Sparkles, Trash2 } from "lucide-react";
+import { ArrowUpRight, BookOpen, Folder, FolderPlus, MoreHorizontal, Pencil, Sparkles, Trash2 } from "lucide-react";
 import { useMemo } from "react";
 import type { Manual } from "../types";
 import { Card } from "./ui/card";
@@ -19,13 +19,10 @@ type Props = {
   onDeleteCategory: (name: string) => void;
 };
 
+// カテゴリーのアイコンは紫とコーラルの交互。コーラル面の文字はネイビーにする
 const ACCENTS = [
-  { dot: "bg-orange-500", soft: "bg-orange-50" },
-  { dot: "bg-sky-500", soft: "bg-sky-50" },
-  { dot: "bg-violet-500", soft: "bg-violet-50" },
-  { dot: "bg-emerald-500", soft: "bg-emerald-50" },
-  { dot: "bg-rose-500", soft: "bg-rose-50" },
-  { dot: "bg-indigo-500", soft: "bg-indigo-50" },
+  "bg-primary text-primary-foreground",
+  "bg-coral text-foreground",
 ];
 
 export function HomeView({
@@ -47,21 +44,28 @@ export function HomeView({
 
   return (
     <div className="max-w-5xl mx-auto px-10 py-12">
-      <div className="mb-10">
-        <div className="inline-flex items-center gap-1.5 text-xs tracking-wider uppercase text-muted-foreground mb-3">
-          <Sparkles className="size-3.5" />
-          Internal Knowledge Base
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-[#666dcf] text-primary-foreground px-8 py-10 mb-10">
+        <span aria-hidden className="absolute -right-10 -top-12 size-44 rounded-full bg-coral" />
+        <span aria-hidden className="absolute right-24 -bottom-14 size-32 rounded-full bg-white/15" />
+        <div className="relative">
+          <div className="inline-flex items-center gap-1.5 text-xs tracking-wider text-primary-foreground/80 mb-3">
+            <Sparkles className="size-3.5 text-coral" />
+            業務マニュアル管理システム
+          </div>
+          <h1 className="tracking-tight text-primary-foreground">テビキ</h1>
+          <p className="mt-2 max-w-xl text-lg font-medium">知りたいことに、すぐ手が届く。</p>
+          <p className="text-primary-foreground/80 mt-1 max-w-xl">
+            部署ごとの業務手順をまとめた社内マニュアル集。カテゴリーを選んで一覧を表示します。
+          </p>
         </div>
-        <h1 className="tracking-tight">業務マニュアル</h1>
-        <p className="text-muted-foreground mt-2 max-w-xl">
-          部署ごとの業務手順をまとめた社内マニュアル集。カテゴリーを選んで一覧を表示します。
-        </p>
       </div>
 
       <div className="mb-12">
         <div className="flex items-baseline justify-between mb-4">
           <h3 className="tracking-tight">カテゴリー</h3>
-          <span className="text-sm text-muted-foreground">{categories.length} 件</span>
+          <span className="rounded-full bg-coral/25 px-2.5 py-0.5 text-xs font-medium text-foreground">
+            {categories.length} 件
+          </span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {categories.map((cat, i) => {
@@ -70,11 +74,11 @@ export function HomeView({
               <Card
                 key={cat}
                 onClick={() => onSelectCategory(cat)}
-                className="group cursor-pointer p-5 hover:border-foreground/20 hover:shadow-sm transition-all relative"
+                className="group cursor-pointer p-5 hover:border-primary/50 hover:shadow-sm transition-all relative"
               >
                 <div className="flex items-start justify-between">
-                  <div className={`size-9 rounded-lg ${a.soft} flex items-center justify-center`}>
-                    <span className={`size-2 rounded-full ${a.dot}`} />
+                  <div className={`size-9 rounded-lg ${a} flex items-center justify-center`}>
+                    <Folder className="size-4" />
                   </div>
                   <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                     <DropdownMenu>
@@ -134,14 +138,21 @@ export function HomeView({
             <h3 className="tracking-tight">最近のマニュアル</h3>
           </div>
           <div className="divide-y rounded-xl border bg-card overflow-hidden">
-            {recent.map((m) => (
+            {recent.map((m, i) => (
               <button
                 key={m.id}
                 onClick={() => onSelectCategory(m.category)}
-                className="w-full flex items-center gap-4 px-5 py-4 hover:bg-muted/40 transition-colors text-left"
+                className="w-full flex items-center gap-4 px-5 py-4 hover:bg-primary/5 transition-colors text-left"
               >
                 <div className="flex-1 min-w-0">
-                  <div className="font-medium truncate">{m.taskName}</div>
+                  <div className="font-medium truncate flex items-center gap-2">
+                    {i === 0 && (
+                      <span className="shrink-0 rounded-full bg-coral px-2 py-0.5 text-[10px] font-bold text-foreground">
+                        新着
+                      </span>
+                    )}
+                    <span className="truncate">{m.taskName}</span>
+                  </div>
                   <div className="text-sm text-muted-foreground truncate mt-0.5">
                     {m.category} · {m.genre} · {m.author}
                   </div>

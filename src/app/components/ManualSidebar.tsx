@@ -1,5 +1,4 @@
 import {
-  BookOpen,
   ChevronRight,
   FilePlus,
   Folder,
@@ -12,6 +11,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import logoMark from "../../assets/logo/logo-mark-white.svg";
 import type { Manual } from "../types";
 import { Button } from "./ui/button";
 import {
@@ -114,12 +114,10 @@ export function ManualSidebar({
   return (
     <aside className="w-72 shrink-0 border-r bg-sidebar text-sidebar-foreground flex flex-col h-full">
       <button onClick={onHome} className="px-5 py-5 flex items-center gap-2.5 text-left">
-        <div className="size-8 rounded-lg bg-foreground text-background flex items-center justify-center">
-          <BookOpen className="size-4" />
-        </div>
+        <img src={logoMark} alt="" className="h-7 w-auto shrink-0" />
         <div>
-          <div className="font-medium tracking-tight leading-tight">業務マニュアル</div>
-          <div className="text-xs text-muted-foreground leading-tight mt-0.5">社内閲覧用</div>
+          <div className="font-bold tracking-tight leading-tight">テビキ</div>
+          <div className="text-xs text-sidebar-foreground/70 leading-tight mt-0.5">業務マニュアル管理システム</div>
         </div>
       </button>
 
@@ -130,14 +128,14 @@ export function ManualSidebar({
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="検索"
-            className="pl-8 h-9 bg-card"
+            className="pl-8 h-9 bg-card text-card-foreground border-transparent"
           />
         </div>
         <Button
           onClick={onHome}
           variant="ghost"
           size="sm"
-          className="w-full justify-start gap-2 h-8 text-muted-foreground hover:text-foreground"
+          className="w-full justify-start gap-2 h-8 text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-foreground"
         >
           <Home className="size-3.5" />
           カテゴリ一覧
@@ -147,12 +145,12 @@ export function ManualSidebar({
       <ScrollArea className="flex-1">
         <div className="px-2 pb-4 pt-1">
           <div className="flex items-center justify-between px-2.5 mb-1.5">
-            <span className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+            <span className="text-[10px] uppercase tracking-[0.12em] text-sidebar-foreground/70">
               カテゴリー
             </span>
             <button
               onClick={onAddCategory}
-              className="size-5 rounded hover:bg-sidebar-accent inline-flex items-center justify-center text-muted-foreground hover:text-foreground"
+              className="size-5 rounded hover:bg-sidebar-accent inline-flex items-center justify-center text-sidebar-foreground/70 hover:text-sidebar-foreground"
               title="カテゴリーを追加"
             >
               <FolderPlus className="size-3.5" />
@@ -161,7 +159,7 @@ export function ManualSidebar({
 
           <div className="space-y-px">
             {categories.length === 0 && (
-              <div className="px-2.5 py-3 text-xs text-muted-foreground text-center">
+              <div className="px-2.5 py-3 text-xs text-sidebar-foreground/70 text-center">
                 カテゴリーがありません
               </div>
             )}
@@ -179,7 +177,7 @@ export function ManualSidebar({
                   >
                     <button
                       onClick={() => toggle(cat)}
-                      className="size-5 inline-flex items-center justify-center text-muted-foreground shrink-0"
+                      className="size-5 inline-flex items-center justify-center text-sidebar-foreground/70 shrink-0"
                     >
                       <ChevronRight
                         className={cn("size-3.5 transition-transform", isOpen && "rotate-90")}
@@ -195,7 +193,7 @@ export function ManualSidebar({
                           if (e.key === "Enter") commitRename();
                           if (e.key === "Escape") setRenaming(null);
                         }}
-                        className="h-7 text-sm flex-1"
+                        className="h-7 text-sm flex-1 bg-card text-card-foreground"
                       />
                     ) : (
                       <button
@@ -207,12 +205,12 @@ export function ManualSidebar({
                         className="flex-1 flex items-center gap-1.5 py-1.5 text-left text-sm min-w-0"
                       >
                         {isOpen ? (
-                          <FolderOpen className="size-3.5 text-muted-foreground shrink-0" />
+                          <FolderOpen className="size-3.5 text-sidebar-foreground/70 shrink-0" />
                         ) : (
-                          <Folder className="size-3.5 text-muted-foreground shrink-0" />
+                          <Folder className="size-3.5 text-sidebar-foreground/70 shrink-0" />
                         )}
                         <span className="truncate">{cat}</span>
-                        <span className="text-xs text-muted-foreground ml-auto tabular-nums pr-1">
+                        <span className="text-xs text-sidebar-foreground/70 ml-auto tabular-nums pr-1">
                           {list.length}
                         </span>
                       </button>
@@ -220,7 +218,7 @@ export function ManualSidebar({
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <button
-                          className="size-5 rounded inline-flex items-center justify-center text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-background data-[state=open]:opacity-100"
+                          className="size-5 rounded inline-flex items-center justify-center text-sidebar-foreground/70 opacity-0 group-hover:opacity-100 hover:bg-sidebar-accent data-[state=open]:opacity-100"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <MoreHorizontal className="size-3.5" />
@@ -248,22 +246,22 @@ export function ManualSidebar({
                   </div>
 
                   {isOpen && (
-                    <div className="ml-[18px] border-l border-border/70 pl-1.5 mt-0.5 space-y-px">
+                    <div className="ml-[18px] border-l border-sidebar-border pl-1.5 mt-0.5 space-y-px">
                       {list.map((m) => (
                         <button
                           key={m.id}
                           onClick={() => onSelect(m.id)}
                           className={cn(
                             "w-full text-left rounded-md px-2 py-1.5 hover:bg-sidebar-accent transition-colors group/m flex items-center gap-2",
-                            selectedId === m.id && "bg-sidebar-accent",
+                            selectedId === m.id && "bg-sidebar-primary text-sidebar-primary-foreground font-medium hover:bg-sidebar-primary",
                           )}
                         >
                           <span
                             className={cn(
                               "size-1.5 rounded-full shrink-0 transition-colors",
                               selectedId === m.id
-                                ? "bg-foreground"
-                                : "bg-border group-hover/m:bg-muted-foreground",
+                                ? "bg-coral"
+                                : "bg-sidebar-foreground/35 group-hover/m:bg-sidebar-foreground/70",
                             )}
                           />
                           <span className="truncate text-sm">{m.taskName}</span>
@@ -272,7 +270,7 @@ export function ManualSidebar({
                       {list.length === 0 && !q && (
                         <button
                           onClick={() => onCreateManual(cat)}
-                          className="w-full text-left rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-colors flex items-center gap-1.5"
+                          className="w-full text-left rounded-md px-2 py-1.5 text-xs text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors flex items-center gap-1.5"
                         >
                           <FilePlus className="size-3" />
                           マニュアルを追加
@@ -287,7 +285,7 @@ export function ManualSidebar({
 
           <button
             onClick={onAddCategory}
-            className="w-full mt-2 rounded-md px-2.5 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-colors flex items-center gap-1.5"
+            className="w-full mt-2 rounded-md px-2.5 py-1.5 text-xs text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors flex items-center gap-1.5"
           >
             <FolderPlus className="size-3.5" />
             カテゴリーを追加
