@@ -24,6 +24,11 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  // 5173 は別プロジェクトで使うため、このプロジェクトは 5273 に固定する
+  server: {
+    port: 5273,
+    strictPort: true,
+  },
   resolve: {
     alias: {
       // Alias @ to the src directory

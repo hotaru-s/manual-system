@@ -2,43 +2,50 @@
 
 :root {
   --font-size: 15px;
-  --background: #fafaf9;
-  --foreground: #0a0a0a;
+  /* テビキ トンマナ: 紫=操作の色、コーラル=気づきの色、淡いラベンダーは背景だけに使う */
+  --background: #f4f2fc;
+  --foreground: #302f50;
   --card: #ffffff;
-  --card-foreground: #0a0a0a;
+  --card-foreground: #302f50;
   --popover: #ffffff;
-  --popover-foreground: #0a0a0a;
-  --primary: #18181b;
-  --primary-foreground: #fafafa;
-  --secondary: #f4f4f5;
-  --secondary-foreground: #18181b;
-  --muted: #f4f4f5;
-  --muted-foreground: #71717a;
-  --accent: #f4f4f5;
-  --accent-foreground: #18181b;
-  --destructive: #dc2626;
+  --popover-foreground: #302f50;
+  --primary: #5b57c9;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f0fa;
+  --secondary-foreground: #302f50;
+  --muted: #f1f0fa;
+  --muted-foreground: #77758b;
+  --accent: #f1f0fa;
+  --accent-foreground: #302f50;
+  --destructive: #c94f58;
   --destructive-foreground: #ffffff;
-  --border: rgba(0, 0, 0, 0.07);
-  --input: transparent;
-  --input-background: #f3f3f5;
-  --switch-background: #cbced4;
+  --border: #e8e6ef;
+  --input: #e8e6ef;
+  --input-background: #ffffff;
+  --switch-background: #cfcde0;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+  --ring: #5b57c9;
+  /* 小さな目印・新着ラベル用。大きな面積には使わず、白文字とは組み合わせない */
+  --coral: #f28c68;
+  --coral-foreground: #ffffff;
+  --success: #32856a;
+  --warning: #b7791f;
+  --chart-1: #5b57c9;
+  --chart-2: #f28c68;
+  --chart-3: #32856a;
+  --chart-4: #b7791f;
+  --chart-5: #c94f58;
   --radius: 0.75rem;
-  --sidebar: #fafaf9;
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: #030213;
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* サイドバーは白。選択中は淡い紫の背景+紫の文字 */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #302f50;
+  --sidebar-primary: #5b57c9;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f1f0fa;
+  --sidebar-accent-foreground: #302f50;
+  --sidebar-border: #e8e6ef;
+  --sidebar-ring: #5b57c9;
 }
 
 .dark {
@@ -100,6 +107,12 @@
   --color-input-background: var(--input-background);
   --color-switch-background: var(--switch-background);
   --color-ring: var(--ring);
+  --shadow-card: 0 2px 12px rgb(91 87 201 / 0.08);
+  --shadow-card-hover: 0 6px 20px rgb(91 87 201 / 0.16);
+  --color-coral: var(--coral);
+  --color-coral-foreground: var(--coral-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -137,21 +150,22 @@
     font-size: var(--font-size);
   }
 
+  /* 見出しは太め、本文は標準 */
   h1 {
     font-size: var(--text-2xl);
-    font-weight: var(--font-weight-medium);
+    font-weight: 700;
     line-height: 1.5;
   }
 
   h2 {
     font-size: var(--text-xl);
-    font-weight: var(--font-weight-medium);
+    font-weight: 700;
     line-height: 1.5;
   }
 
   h3 {
     font-size: var(--text-lg);
-    font-weight: var(--font-weight-medium);
+    font-weight: 700;
     line-height: 1.5;
   }
 
@@ -178,4 +192,35 @@
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
   }
+}
+
+/*
+ * ボタン・リンク系は常に cursor: pointer。
+ * レイヤー外に置くことで、Radix のメニュー項目などの cursor-default より優先させる。
+ */
+button,
+a[href],
+summary,
+select,
+label[for],
+input[type="checkbox"],
+input[type="radio"],
+input[type="file"],
+[role="button"],
+[role="tab"],
+[role="menuitem"],
+[role="menuitemcheckbox"],
+[role="menuitemradio"],
+[role="option"],
+[role="checkbox"],
+[role="radio"],
+[role="switch"],
+[role="combobox"] {
+  cursor: pointer;
+}
+
+button:disabled,
+[aria-disabled="true"],
+[data-disabled] {
+  cursor: not-allowed;
 }

@@ -1,19 +1,25 @@
 import {
-  BookOpen,
+  Building2,
+  Check,
   ChevronRight,
+  ChevronsUpDown,
   FilePlus,
+  FileText,
   Folder,
   FolderOpen,
   FolderPlus,
   Home,
   MoreHorizontal,
   Pencil,
+  Plus,
   Search,
   Trash2,
+  X,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
-import type { Manual } from "../types";
-import { Button } from "./ui/button";
+import { useEffect, useMemo, useState } from "react";
+import logoMark from "../../assets/logo/logo-mark.svg";
+import { parseQuery, searchManual, type SearchHit } from "../search";
+import type { Folder as FolderType, Manual } from "../types";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,271 +33,305 @@ import { cn } from "./ui/utils";
 
 type Props = {
   manuals: Manual[];
-  categories: string[];
+  departments: string[];
+  folders: FolderType[];
+  currentDepartment?: string;
   selectedId?: string;
-  selectedCategory?: string;
-  onSelect: (id: string) => void;
-  onSelectCategory: (c: string) => void;
+  selectedFolder?: string;
+  query: string;
+  onQueryChange: (q: string) => void;
   onHome: () => void;
-  onCreateManual: (category?: string) => void;
-  onAddCategory: () => void;
-  onRenameCategory: (oldName: string, newName: string) => void;
-  onDeleteCategory: (name: string) => void;
+  onSelectDepartment: (department: string) => void;
+  onSelectFolder: (department: string, folder: string) => void;
+  onSelectManual: (id: string) => void;
+  onAddDepartment: () => void;
+  onAddFolder: (department: string) => void;
+  onCreateManual: (department: string, folder: string) => void;
+  onRenameFolder: (department: string, oldName: string, newName: string) => void;
+  onDeleteFolder: (department: string, name: string) => void;
 };
+
+const rowBase = "w-full text-left rounded-lg px-2 py-1.5 transition-colors flex items-center gap-2 text-sm";
+const rowIdle = "text-foreground/80 hover:bg-secondary hover:text-foreground";
+const rowActive = "bg-primary/10 text-primary font-medium";
 
 export function ManualSidebar({
   manuals,
-  categories,
+  departments,
+  folders,
+  currentDepartment,
   selectedId,
-  selectedCategory,
-  onSelect,
-  onSelectCategory,
+  selectedFolder,
+  query,
+  onQueryChange,
   onHome,
+  onSelectDepartment,
+  onSelectFolder,
+  onSelectManual,
+  onAddDepartment,
+  onAddFolder,
   onCreateManual,
-  onAddCategory,
-  onRenameCategory,
-  onDeleteCategory,
+  onRenameFolder,
+  onDeleteFolder,
 }: Props) {
-  const [q, setQ] = useState("");
-  const [openCats, setOpenCats] = useState<Set<string>>(() => new Set(categories));
-  const [renaming, setRenaming] = useState<string | null>(null);
-  const [renameValue, setRenameValue] = useState("");
-  const renameInputRef = useRef<HTMLInputElement>(null);
+  const terms = useMemo(() => parseQuery(query), [query]);
+  const searching = terms.length > 0;
+  const [open, setOpen] = useState<Set<string>>(new Set());
 
+  const selected = manuals.find((m) => m.id === selectedId);
+  // 選んでいるマニュアルのフォルダは、自動で開く
   useEffect(() => {
-    if (renaming) {
-      renameInputRef.current?.focus();
-      renameInputRef.current?.select();
-    }
-  }, [renaming]);
+    if (!selected) return;
+    const key = `${selected.department}/${selected.folder}`;
+    setOpen((prev) => (prev.has(key) ? prev : new Set(prev).add(key)));
+  }, [selected?.department, selected?.folder]);
 
-  useEffect(() => {
-    if (selectedCategory) {
-      setOpenCats((prev) => {
-        if (prev.has(selectedCategory)) return prev;
-        const next = new Set(prev);
-        next.add(selectedCategory);
-        return next;
-      });
-    }
-  }, [selectedCategory]);
-
-  const byCategory = useMemo(() => {
-    const filter = q.toLowerCase();
-    const map = new Map<string, Manual[]>();
-    for (const c of categories) map.set(c, []);
-    for (const m of manuals) {
-      if (!map.has(m.category)) map.set(m.category, []);
-      const matchText =
-        !filter ||
-        m.taskName.toLowerCase().includes(filter) ||
-        m.category.toLowerCase().includes(filter) ||
-        m.genre.toLowerCase().includes(filter) ||
-        m.author.toLowerCase().includes(filter);
-      if (matchText) map.get(m.category)!.push(m);
-    }
-    return map;
-  }, [manuals, categories, q]);
-
-  const toggle = (c: string) =>
-    setOpenCats((prev) => {
+  const toggle = (key: string) =>
+    setOpen((prev) => {
       const next = new Set(prev);
-      if (next.has(c)) next.delete(c);
-      else next.add(c);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
       return next;
     });
 
-  const startRename = (c: string) => {
-    setRenameValue(c);
-    setRenaming(c);
-  };
+  // 検索は全部の課が対象。ヒットしたものを一覧で出す
+  const { results, hits } = useMemo(() => {
+    const hits = new Map<string, SearchHit>();
+    const results: Manual[] = [];
+    if (terms.length === 0) return { results, hits };
+    for (const m of manuals) {
+      const hit = searchManual(m, terms);
+      if (!hit.match) continue;
+      hits.set(m.id, hit);
+      results.push(m);
+    }
+    return { results, hits };
+  }, [manuals, terms]);
 
-  const commitRename = () => {
-    if (renaming) onRenameCategory(renaming, renameValue);
-    setRenaming(null);
-  };
+  const myFolders = folders.filter((f) => f.department === currentDepartment);
+  const inFolder = (name: string) =>
+    manuals.filter((m) => m.department === currentDepartment && m.folder === name);
 
   return (
-    <aside className="w-72 shrink-0 border-r bg-sidebar text-sidebar-foreground flex flex-col h-full">
-      <button onClick={onHome} className="px-5 py-5 flex items-center gap-2.5 text-left">
-        <div className="size-8 rounded-lg bg-foreground text-background flex items-center justify-center">
-          <BookOpen className="size-4" />
-        </div>
+    <aside className="flex h-full w-72 shrink-0 flex-col bg-sidebar text-sidebar-foreground">
+      <button onClick={onHome} className="flex items-center gap-2.5 px-5 py-5 text-left">
+        <img src={logoMark} alt="" className="h-7 w-auto shrink-0" />
         <div>
-          <div className="font-medium tracking-tight leading-tight">業務マニュアル</div>
-          <div className="text-xs text-muted-foreground leading-tight mt-0.5">社内閲覧用</div>
+          <div className="font-bold leading-tight tracking-tight">テビキ</div>
+          <div className="mt-0.5 text-xs leading-tight text-muted-foreground">業務マニュアル管理システム</div>
         </div>
       </button>
 
-      <div className="px-3 pb-3 space-y-1.5">
+      <div className="space-y-2 px-3 pb-3">
         <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="検索"
-            className="pl-8 h-9 bg-card"
+            value={query}
+            onChange={(e) => onQueryChange(e.target.value)}
+            onKeyDown={(e) => {
+              // 日本語入力の変換確定のEnterでは動かさない
+              if (e.nativeEvent.isComposing) return;
+              if (e.key === "Enter" && results[0]) onSelectManual(results[0].id);
+              if (e.key === "Escape") onQueryChange("");
+            }}
+            placeholder="タイトル・本文・タグで検索"
+            className="h-9 rounded-full pl-9 pr-8 focus-visible:border-primary focus-visible:ring-[3px] focus-visible:ring-primary/20"
           />
+          {query && (
+            <button
+              onClick={() => onQueryChange("")}
+              className="absolute right-1.5 top-1/2 inline-flex size-6 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground"
+              title="検索をクリア"
+              aria-label="検索をクリア"
+            >
+              <X className="size-3.5" />
+            </button>
+          )}
         </div>
-        <Button
-          onClick={onHome}
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start gap-2 h-8 text-muted-foreground hover:text-foreground"
-        >
-          <Home className="size-3.5" />
-          カテゴリ一覧
-        </Button>
+        {searching && (
+          <div className="px-1 text-xs text-muted-foreground">
+            {results.length > 0 ? `${results.length} 件ヒット(Enterで先頭を開く)` : "該当するマニュアルがありません"}
+          </div>
+        )}
+
+        {!searching && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex w-full items-center gap-2.5 rounded-xl bg-secondary px-3 py-2 text-left transition-colors hover:bg-primary/10">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-card text-primary">
+                  <Building2 className="size-4" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[10px] leading-none tracking-[0.14em] text-muted-foreground">DEPARTMENT</span>
+                  <span className="mt-1 block truncate text-sm font-medium">
+                    {currentDepartment ?? "課を選ぶ"}
+                  </span>
+                </span>
+                <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-64">
+              {departments.map((d) => (
+                <DropdownMenuItem key={d} className="gap-2" onClick={() => onSelectDepartment(d)}>
+                  <Building2 className="size-3.5" />
+                  <span className="flex-1 truncate">{d}</span>
+                  {d === currentDepartment && <Check className="size-3.5 text-primary" />}
+                </DropdownMenuItem>
+              ))}
+              {departments.length > 0 && <DropdownMenuSeparator />}
+              <DropdownMenuItem className="gap-2" onClick={onHome}>
+                <Home className="size-3.5" />
+                課の一覧へ
+              </DropdownMenuItem>
+              <DropdownMenuItem className="gap-2" onClick={onAddDepartment}>
+                <Plus className="size-3.5" />
+                課を追加
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
 
       <ScrollArea className="flex-1">
-        <div className="px-2 pb-4 pt-1">
-          <div className="flex items-center justify-between px-2.5 mb-1.5">
-            <span className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-              カテゴリー
-            </span>
-            <button
-              onClick={onAddCategory}
-              className="size-5 rounded hover:bg-sidebar-accent inline-flex items-center justify-center text-muted-foreground hover:text-foreground"
-              title="カテゴリーを追加"
-            >
-              <FolderPlus className="size-3.5" />
-            </button>
-          </div>
-
-          <div className="space-y-px">
-            {categories.length === 0 && (
-              <div className="px-2.5 py-3 text-xs text-muted-foreground text-center">
-                カテゴリーがありません
+        <div className="px-3 pb-4">
+          {searching ? (
+            <div className="space-y-0.5">
+              {results.map((m) => (
+                <button
+                  key={m.id}
+                  onClick={() => onSelectManual(m.id)}
+                  className={cn(rowBase, "items-start", selectedId === m.id ? rowActive : rowIdle)}
+                >
+                  <FileText className="mt-0.5 size-3.5 shrink-0" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate">{m.taskName}</span>
+                    <span className="block truncate text-xs font-normal text-muted-foreground">
+                      {m.department} / {m.folder}
+                    </span>
+                  </span>
+                  {hits.get(m.id)?.bodyOnly && (
+                    <span className="mt-0.5 shrink-0 rounded-full bg-primary/10 px-1.5 text-[10px] text-primary">本文</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          ) : currentDepartment ? (
+            <>
+              <div className="mb-1 flex items-center justify-between px-2">
+                <span className="text-[10px] tracking-[0.14em] text-muted-foreground">FOLDERS</span>
+                <button
+                  onClick={() => onAddFolder(currentDepartment)}
+                  className="inline-flex size-6 items-center justify-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground"
+                  title="フォルダを追加"
+                  aria-label="フォルダを追加"
+                >
+                  <FolderPlus className="size-3.5" />
+                </button>
               </div>
-            )}
-            {categories.map((cat) => {
-              const list = byCategory.get(cat) ?? [];
-              const isOpen = openCats.has(cat) || !!q;
-              const isActive = selectedCategory === cat;
-              return (
-                <div key={cat}>
-                  <div
-                    className={cn(
-                      "group flex items-center gap-1 rounded-md pr-1 hover:bg-sidebar-accent transition-colors",
-                      isActive && "bg-sidebar-accent",
-                    )}
-                  >
-                    <button
-                      onClick={() => toggle(cat)}
-                      className="size-5 inline-flex items-center justify-center text-muted-foreground shrink-0"
-                    >
-                      <ChevronRight
-                        className={cn("size-3.5 transition-transform", isOpen && "rotate-90")}
-                      />
-                    </button>
-                    {renaming === cat ? (
-                      <Input
-                        ref={renameInputRef}
-                        value={renameValue}
-                        onChange={(e) => setRenameValue(e.target.value)}
-                        onBlur={commitRename}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") commitRename();
-                          if (e.key === "Escape") setRenaming(null);
-                        }}
-                        className="h-7 text-sm flex-1"
-                      />
-                    ) : (
-                      <button
-                        onClick={() => {
-                          onSelectCategory(cat);
-                          if (!openCats.has(cat)) toggle(cat);
-                        }}
-                        onDoubleClick={() => startRename(cat)}
-                        className="flex-1 flex items-center gap-1.5 py-1.5 text-left text-sm min-w-0"
-                      >
-                        {isOpen ? (
-                          <FolderOpen className="size-3.5 text-muted-foreground shrink-0" />
-                        ) : (
-                          <Folder className="size-3.5 text-muted-foreground shrink-0" />
-                        )}
-                        <span className="truncate">{cat}</span>
-                        <span className="text-xs text-muted-foreground ml-auto tabular-nums pr-1">
-                          {list.length}
-                        </span>
-                      </button>
-                    )}
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button
-                          className="size-5 rounded inline-flex items-center justify-center text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-background data-[state=open]:opacity-100"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <MoreHorizontal className="size-3.5" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-44">
-                        <DropdownMenuItem onClick={() => onCreateManual(cat)} className="gap-2">
-                          <FilePlus className="size-3.5" />
-                          新規マニュアル
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => startRename(cat)} className="gap-2">
-                          <Pencil className="size-3.5" />
-                          名前を変更
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => onDeleteCategory(cat)}
-                          className="gap-2 text-rose-600 focus:text-rose-700"
-                        >
-                          <Trash2 className="size-3.5" />
-                          カテゴリーを削除
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
 
-                  {isOpen && (
-                    <div className="ml-[18px] border-l border-border/70 pl-1.5 mt-0.5 space-y-px">
-                      {list.map((m) => (
+              {myFolders.length === 0 && (
+                <div className="px-2 py-3 text-center text-xs text-muted-foreground">フォルダがありません</div>
+              )}
+
+              <div className="space-y-0.5">
+                {myFolders.map((f) => {
+                  const key = `${currentDepartment}/${f.name}`;
+                  const list = inFolder(f.name);
+                  const isOpen = open.has(key);
+                  const isActive = selectedFolder === f.name && !selectedId;
+                  return (
+                    <div key={key}>
+                      <div className={cn("group flex items-center rounded-lg pr-1 transition-colors", isActive ? "bg-primary/10" : "hover:bg-secondary")}>
                         <button
-                          key={m.id}
-                          onClick={() => onSelect(m.id)}
+                          onClick={() => toggle(key)}
+                          className="inline-flex size-6 shrink-0 items-center justify-center text-muted-foreground"
+                          aria-label={isOpen ? "閉じる" : "開く"}
+                        >
+                          <ChevronRight className={cn("size-3.5 transition-transform", isOpen && "rotate-90")} />
+                        </button>
+                        <button
+                          onClick={() => {
+                            onSelectFolder(currentDepartment, f.name);
+                            if (!isOpen) toggle(key);
+                          }}
                           className={cn(
-                            "w-full text-left rounded-md px-2 py-1.5 hover:bg-sidebar-accent transition-colors group/m flex items-center gap-2",
-                            selectedId === m.id && "bg-sidebar-accent",
+                            "flex min-w-0 flex-1 items-center gap-2 py-1.5 text-left text-sm",
+                            isActive ? "font-medium text-primary" : "text-foreground/80",
                           )}
                         >
-                          <span
-                            className={cn(
-                              "size-1.5 rounded-full shrink-0 transition-colors",
-                              selectedId === m.id
-                                ? "bg-foreground"
-                                : "bg-border group-hover/m:bg-muted-foreground",
-                            )}
-                          />
-                          <span className="truncate text-sm">{m.taskName}</span>
+                          {isOpen ? <FolderOpen className="size-3.5 shrink-0" /> : <Folder className="size-3.5 shrink-0" />}
+                          <span className="truncate">{f.name}</span>
+                          <span className="ml-auto pr-1 text-xs tabular-nums text-muted-foreground">{list.length}</span>
                         </button>
-                      ))}
-                      {list.length === 0 && !q && (
-                        <button
-                          onClick={() => onCreateManual(cat)}
-                          className="w-full text-left rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-colors flex items-center gap-1.5"
-                        >
-                          <FilePlus className="size-3" />
-                          マニュアルを追加
-                        </button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button
+                              className="inline-flex size-6 items-center justify-center rounded-full text-muted-foreground opacity-0 hover:bg-card group-hover:opacity-100 data-[state=open]:opacity-100"
+                              aria-label={`フォルダ「${f.name}」のメニュー`}
+                            >
+                              <MoreHorizontal className="size-3.5" />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-44">
+                            <DropdownMenuItem className="gap-2" onClick={() => onCreateManual(currentDepartment, f.name)}>
+                              <FilePlus className="size-3.5" />
+                              新規マニュアル
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="gap-2"
+                              onClick={() => {
+                                const v = prompt("新しいフォルダ名", f.name);
+                                if (v) onRenameFolder(currentDepartment, f.name, v);
+                              }}
+                            >
+                              <Pencil className="size-3.5" />
+                              名前を変更
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => onDeleteFolder(currentDepartment, f.name)}
+                              className="gap-2 text-rose-600 focus:text-rose-700"
+                            >
+                              <Trash2 className="size-3.5" />
+                              フォルダを削除
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+
+                      {isOpen && (
+                        <div className="ml-3 mt-0.5 space-y-0.5 border-l border-border pl-2">
+                          {list.map((m) => (
+                            <button
+                              key={m.id}
+                              onClick={() => onSelectManual(m.id)}
+                              className={cn(rowBase, selectedId === m.id ? rowActive : rowIdle)}
+                            >
+                              <FileText className="size-3.5 shrink-0" />
+                              <span className="truncate">{m.taskName}</span>
+                            </button>
+                          ))}
+                          {list.length === 0 && (
+                            <button
+                              onClick={() => onCreateManual(currentDepartment, f.name)}
+                              className={cn(rowBase, "text-xs text-muted-foreground hover:bg-secondary")}
+                            >
+                              <FilePlus className="size-3" />
+                              マニュアルを追加
+                            </button>
+                          )}
+                        </div>
                       )}
                     </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          <button
-            onClick={onAddCategory}
-            className="w-full mt-2 rounded-md px-2.5 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-colors flex items-center gap-1.5"
-          >
-            <FolderPlus className="size-3.5" />
-            カテゴリーを追加
-          </button>
+                  );
+                })}
+              </div>
+            </>
+          ) : (
+            <div className="px-2 py-6 text-center text-xs text-muted-foreground">
+              課を追加すると、ここにフォルダが並びます
+            </div>
+          )}
         </div>
       </ScrollArea>
     </aside>

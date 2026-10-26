@@ -30,10 +30,17 @@ export type Section = {
   items: Item[];
 };
 
+// 階層は「課 → フォルダ → マニュアル」。フォルダは課の中にだけあり、入れ子にはしない
+export type Folder = {
+  department: string;
+  name: string;
+};
+
 export type Manual = {
   id: string;
-  category: string;
-  genre: string;
+  department: string;
+  folder: string;
+  tags?: string[];
   author: string;
   taskName: string;
   updatedAt: string;

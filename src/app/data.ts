@@ -1,10 +1,11 @@
+import { tonmanaGuide } from "./sampleTonmana";
 import type { Manual } from "./types";
 
-export const initialManuals: Manual[] = [
+const baseManuals: Manual[] = [
   {
     id: "m1",
-    category: "デザイン課",
-    genre: "基本情報",
+    department: "デザイン課",
+    folder: "基本情報",
     author: "苗字",
     taskName: "社名について",
     updatedAt: "2025/7/25",
@@ -97,8 +98,8 @@ export const initialManuals: Manual[] = [
   },
   {
     id: "m2",
-    category: "デザイン課",
-    genre: "業務フロー",
+    department: "デザイン課",
+    folder: "業務フロー",
     author: "山田",
     taskName: "デザイン依頼の受付",
     updatedAt: "2025/8/10",
@@ -133,8 +134,8 @@ export const initialManuals: Manual[] = [
   },
   {
     id: "m3",
-    category: "営業課",
-    genre: "基本情報",
+    department: "営業課",
+    folder: "基本情報",
     author: "鈴木",
     taskName: "見積書の作成",
     updatedAt: "2025/9/3",
@@ -166,3 +167,9 @@ export const initialManuals: Manual[] = [
     ],
   },
 ];
+
+export const initialManuals: Manual[] = [...baseManuals, tonmanaGuide];
+
+// 旧形式(v4)の保存データに最初から入っていたサンプル。
+// 旧データを移すときは、これらを「追加済み」とみなし、それ以外のサンプルは必ず入れ直す。
+export const LEGACY_SEED_IDS = ["m1", "m2", "m3"];

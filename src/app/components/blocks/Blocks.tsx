@@ -180,7 +180,7 @@ function ListBlockView({
     );
   }
   return (
-    <div className="rounded-lg border bg-background p-3 space-y-2">
+    <div className="rounded-lg bg-secondary/50 p-3 space-y-2">
       <div className="flex items-center gap-1">
         <Button
           size="sm"
@@ -207,7 +207,7 @@ function ListBlockView({
             <span className="text-muted-foreground w-5 text-right text-sm">
               {block.ordered ? `${i + 1}.` : "•"}
             </span>
-            <div className="flex-1 min-w-0 rounded border bg-background">
+            <div className="flex-1 min-w-0 rounded bg-background">
               <RichEditor
                 value={it}
                 editing
@@ -256,7 +256,7 @@ function TableBlockView({
 
   if (!editing) {
     return (
-      <div className="overflow-x-auto rounded-lg border">
+      <div className="overflow-x-auto rounded-lg shadow-sm bg-card">
         <table className="w-full text-sm">
           <thead className="bg-muted">
             <tr>
@@ -295,7 +295,7 @@ function TableBlockView({
   };
 
   return (
-    <div className="rounded-lg border bg-background p-3 space-y-2">
+    <div className="rounded-lg bg-secondary/50 p-3 space-y-2">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <tbody>
@@ -371,22 +371,22 @@ function TableBlockView({
 /* ============== Alert ============== */
 const ALERT_STYLES: Record<AlertVariant, { wrap: string; icon: React.ReactNode; label: string }> = {
   info: {
-    wrap: "border-sky-300 bg-sky-50 text-sky-900",
-    icon: <Info className="size-5 text-sky-600" />,
+    wrap: "border-primary bg-primary/10 text-foreground",
+    icon: <Info className="size-5 text-primary" />,
     label: "情報",
   },
   warning: {
-    wrap: "border-amber-300 bg-amber-50 text-amber-900",
+    wrap: "border-amber-400 bg-amber-50 text-amber-900",
     icon: <AlertTriangle className="size-5 text-amber-600" />,
     label: "注意",
   },
   danger: {
-    wrap: "border-rose-400 bg-rose-50 text-rose-900",
+    wrap: "border-rose-500 bg-rose-50 text-rose-900",
     icon: <AlertCircle className="size-5 text-rose-600" />,
     label: "警告",
   },
   success: {
-    wrap: "border-emerald-300 bg-emerald-50 text-emerald-900",
+    wrap: "border-emerald-500 bg-emerald-50 text-emerald-900",
     icon: <CheckCircle2 className="size-5 text-emerald-600" />,
     label: "成功",
   },
@@ -403,7 +403,7 @@ function AlertBlockView({
 }) {
   const style = ALERT_STYLES[block.variant];
   return (
-    <div className={cn("rounded-lg border-2 p-4 flex gap-3", style.wrap)}>
+    <div className={cn("rounded-lg border-l-4 p-4 flex gap-3", style.wrap)}>
       <div className="shrink-0 mt-0.5">{style.icon}</div>
       <div className="flex-1 min-w-0">
         {editing && (
@@ -454,7 +454,7 @@ function ImageBlockView({
     if (!block.src) return null;
     return (
       <figure className="space-y-1.5">
-        <img src={block.src} alt={block.caption} className="rounded-lg border max-w-full" />
+        <img src={block.src} alt={block.caption} className="rounded-lg shadow-sm max-w-full" />
         {block.caption && (
           <figcaption className="text-sm text-muted-foreground text-center">{block.caption}</figcaption>
         )}
@@ -463,10 +463,10 @@ function ImageBlockView({
   }
 
   return (
-    <div className="rounded-lg border bg-background p-3 space-y-2">
+    <div className="rounded-lg bg-secondary/50 p-3 space-y-2">
       {block.src ? (
         <div className="relative">
-          <img src={block.src} alt={block.caption} className="rounded-md border max-w-full" />
+          <img src={block.src} alt={block.caption} className="rounded-md shadow-sm max-w-full" />
           <Button
             size="sm"
             variant="secondary"
@@ -479,7 +479,7 @@ function ImageBlockView({
       ) : (
         <button
           onClick={() => inputRef.current?.click()}
-          className="w-full rounded-md border-2 border-dashed py-10 flex flex-col items-center gap-2 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+          className="w-full rounded-md bg-primary/5 hover:bg-primary/10 py-10 flex flex-col items-center gap-2 text-primary transition-colors"
         >
           <ImageIcon className="size-8" />
           <span className="text-sm">クリックして画像をアップロード</span>
@@ -517,13 +517,16 @@ function QuoteBlockView({
   onChange: (b: Block) => void;
 }) {
   return (
-    <blockquote className="border-l-4 border-primary/60 bg-muted/40 pl-4 pr-3 py-3 rounded-r-md italic">
-      <RichEditor
-        value={block.html}
-        onChange={(html) => onChange({ ...block, html })}
-        editing={editing}
-        placeholder="引用文を入力"
-      />
+    <blockquote className="flex gap-3 border-l-4 border-primary bg-secondary/70 pl-4 pr-3 py-3 rounded-r-md italic">
+      <Quote className="size-5 shrink-0 text-primary mt-0.5" />
+      <div className="flex-1 min-w-0">
+        <RichEditor
+          value={block.html}
+          onChange={(html) => onChange({ ...block, html })}
+          editing={editing}
+          placeholder="引用文を入力"
+        />
+      </div>
     </blockquote>
   );
 }
@@ -538,14 +541,14 @@ export function AddBlockMenu({
 }) {
   if (variant === "full") {
     return (
-      <div className="rounded-lg border-2 border-dashed p-4">
+      <div className="rounded-lg bg-primary/5 p-4">
         <div className="text-sm text-muted-foreground mb-2">ブロックを追加</div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {BLOCK_OPTIONS.map((opt) => (
             <button
               key={opt.type}
               onClick={() => onAdd(opt.type)}
-              className="flex items-start gap-2 rounded-md border bg-background p-2.5 text-left hover:border-primary hover:bg-primary/5 transition-colors"
+              className="flex items-start gap-2 rounded-md bg-card shadow-sm p-2.5 text-left hover:bg-primary/10 transition-colors"
             >
               <span className="text-primary mt-0.5">{opt.icon}</span>
               <div className="min-w-0">
@@ -588,7 +591,7 @@ function InlineAddButton({ onAdd }: { onAdd: (t: BlockType) => void }) {
       <div className="absolute left-0 right-0 -top-1 flex items-center justify-center">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="inline-flex items-center gap-1 rounded-full border bg-background px-2 py-0.5 text-xs text-muted-foreground hover:text-primary hover:border-primary shadow-sm">
+            <button className="inline-flex items-center gap-1 rounded-full bg-card px-2 py-0.5 text-xs text-muted-foreground hover:text-primary shadow-sm">
               <Plus className="size-3" />
               追加
             </button>
